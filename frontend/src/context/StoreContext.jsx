@@ -10,6 +10,8 @@ const StoreContextProvider = (props) => {
   const [menu_list, setMenulist] = useState([]);
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // Add global loading state
+  const [error, setError] = useState(null); // Add global error state
+
   const [settings, setSettings] = useState({
     phone: "+1-212-456-7890",
     email: "contact@mentesdelivery.com",
@@ -21,6 +23,7 @@ const StoreContextProvider = (props) => {
   });
 
   const addToCart = async (itemId) => {
+    // ... (rest of addToCart)
     if (!cartItems[itemId]) {
       setCartItems((prev) => ({ ...prev, [itemId]: 1 }));
     } else {
@@ -86,9 +89,11 @@ const StoreContextProvider = (props) => {
         setFoodlist(response.data.data);
       } else {
         console.error("Failed to fetch food list:", response.data.message);
+        setError("Failed to load food items. Please try again.");
       }
     } catch (error) {
       console.error("Error fetching food list:", error);
+      setError("Network error: Unable to connect to backend. Please check your connection.");
     }
   };
 
@@ -150,6 +155,7 @@ const StoreContextProvider = (props) => {
   useEffect(() => {
     async function LoadData() {
       setIsLoading(true);
+      setError(null); // Reset error on reload
       try {
         // Parallelize independent fetch requests
         const commonPromises = [
@@ -170,6 +176,7 @@ const StoreContextProvider = (props) => {
         await Promise.all(commonPromises);
       } catch (error) {
         console.error("Error loading initial data:", error);
+        setError("An unexpected error occurred while loading data.");
       } finally {
         setIsLoading(false);
       }
@@ -193,6 +200,7 @@ const StoreContextProvider = (props) => {
     userData,
     fetchUserData,
     isLoading, // Export isLoading
+    error,     // Export error
   };
   return (
     <StoreContext.Provider value={contextValue}>

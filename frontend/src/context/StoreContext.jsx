@@ -127,14 +127,23 @@ const StoreContextProvider = (props) => {
   };
   useEffect(() => {
     async function LoadData() {
-      await fetchFoodList();
-      await fetchMenuList();
-      await fetchSettings();
-      if (localStorage.getItem("token")) {
-        setToken(localStorage.getItem("token"));
-        await loadCardData(localStorage.getItem("token"));
-        await fetchUserData(localStorage.getItem("token"));
+      // Parallelize independent fetch requests
+      const commonPromises = [
+        fetchFoodList(),
+        fetchMenuList(),
+        fetchSettings()
+      ];
+
+      // Add user-specific data loading if a token exists
+      const token = localStorage.getItem("token");
+      if (token) {
+        setToken(token);
+        commonPromises.push(loadCardData(token));
+        commonPromises.push(fetchUserData(token));
       }
+
+      // Execute all requests concurrently
+      await Promise.all(commonPromises);
     }
     LoadData();
   }, []);

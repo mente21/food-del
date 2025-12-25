@@ -14,8 +14,16 @@ const FoodItem = ({ id, name, price, description, image, item, setSelectedProduc
       <div className="food-item-img-container">
         <img
           className="food-item-image"
-          src={displayImage.startsWith("http") ? displayImage : url + "/images/" + displayImage}
+          src={(() => {
+            const imgUrl = displayImage.startsWith("http") ? displayImage : url + "/images/" + displayImage;
+            // Optimize Cloudinary URLs
+            if (imgUrl.includes("cloudinary.com") && !imgUrl.includes("/f_auto,q_auto")) {
+              return imgUrl.replace("/upload/", "/upload/f_auto,q_auto/");
+            }
+            return imgUrl;
+          })()}
           alt=""
+          loading="lazy"
           onClick={() => setSelectedProduct(item)}
         />
 

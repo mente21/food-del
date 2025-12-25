@@ -24,8 +24,9 @@ const ExploreMenu = ({ category, setCategory }) => {
             >
               <img
                 className={category === item.menu_name ? "active" : ""}
-                src={item.menu_image}
+                src={item.menu_image.includes("cloudinary.com") ? item.menu_image.replace("/upload/", "/upload/f_auto,q_auto/") : item.menu_image}
                 alt=""
+                loading="lazy"
               />
               <p>{item.menu_name}</p>
             </div>

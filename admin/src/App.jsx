@@ -15,7 +15,7 @@ import "react-toastify/dist/ReactToastify.css";
 import DebugBanner from "./components/DebugBanner/DebugBanner";
 
 const App = () => {
-  const url = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+  const url = (import.meta.env.VITE_BACKEND_URL || "http://localhost:4000").replace(/\/+$/, "");
   return (
     <div>
       <ToastContainer />

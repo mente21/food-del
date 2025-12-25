@@ -24,16 +24,17 @@ const allowedOrigins = [
   "http://localhost:4000"
 ].filter(Boolean);
 
+// Permissive CORS for debugging/production connectivity
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(null, false);
-    }
-  },
+  origin: true, // Allow all origins
   credentials: true
 }));
+
+// Request Logger
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
 
 //DB connection
 connectDB();

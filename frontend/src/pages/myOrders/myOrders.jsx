@@ -7,23 +7,28 @@ import axios from "axios";
 const MyOrders = () => {
   const { url, token } = useContext(StoreContext);
   const [data, setData] = useState([]);
-  // 💡 Add a loading state for better UX
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentOrders = data.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(data.length / itemsPerPage);
 
   const fetchOrders = async () => {
     try {
-      setIsLoading(true); // Start loading
+      setIsLoading(true);
       const response = await axios.post(
-        url + "/api/order/userorders",
+        url + "/api/order/userOrders",
         {},
         { headers: { token } }
       );
       setData(response.data.data);
-      console.log(response.data.data);
     } catch (error) {
       console.error("Error fetching orders:", error);
     } finally {
-      setIsLoading(false); // End loading
+      setIsLoading(false);
     }
   };
 
@@ -31,7 +36,6 @@ const MyOrders = () => {
     if (token) {
       fetchOrders();
     } else {
-      // If token is not available (e.g., user is logged out)
       setIsLoading(false);
     }
   }, [token]);
@@ -40,31 +44,22 @@ const MyOrders = () => {
     <div className="my-orders">
       <h2>My Orders</h2>
       <div className="container">
-        {/* --------------------------------------------------- */}
-        {/* ✅ CRITICAL CONDITIONAL RENDERING LOGIC */}
-        {/* --------------------------------------------------- */}
-
-        {/* 1. Show Loading State */}
         {isLoading && (
           <p className="loading-message">Loading your order history...</p>
         )}
 
-        {/* 2. Show No Orders Message */}
         {!isLoading && data.length === 0 && (
           <div className="no-orders-message">
             <p>
               You haven't placed any orders yet! Start exploring our menu to
               place your first order.
             </p>
-            {/* Optional: Add a button to navigate to the home/menu page */}
-            {/* <button onClick={() => window.location.href = "/"}>Go to Menu</button> */}
           </div>
         )}
 
-        {/* 3. Show Orders (If data is available and not loading) */}
         {!isLoading &&
           data.length > 0 &&
-          data.map((order, index) => {
+          currentOrders.map((order, index) => {
             return (
               <div key={index} className="my-orders-order">
                 <img src={assets.parcel_icon} alt="Parcel Icon" />
@@ -87,6 +82,16 @@ const MyOrders = () => {
               </div>
             );
           })}
+        
+        {totalPages > 1 && (
+          <div className="pagination">
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>&lt;</button>
+            {[...Array(totalPages)].map((_, i) => (
+              <button key={i} className={currentPage === i + 1 ? "active" : ""} onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
+            ))}
+            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>&gt;</button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -4,57 +4,100 @@ import axios from "axios";
 import { assets } from "../../assets/assets";
 import { toast } from "react-toastify";
 const Add = ({ url }) => {
-  const [image, setImage] = useState(false);
+  const [images, setImages] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [data, setData] = useState({
     name: "",
     description: "",
     price: "",
-    category: "salad",
+    category: "",
   });
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${url}/api/category/list`);
+      if (response.data.success) {
+        setCategories(response.data.data);
+        if (response.data.data.length > 0 && !data.category) {
+          setData(prev => ({ ...prev, category: response.data.data[0].name }));
+        }
+      }
+    } catch (error) {
+      console.log("Error fetching categories", error);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const onchangeHandler = (event) => {
     const name = event.target.name;
     const value = event.target.value;
     setData((data) => ({ ...data, [name]: value }));
   };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImages(files);
+  };
+
   const onsubmitHandler = async (event) => {
     event.preventDefault();
+    if (images.length === 0) {
+      toast.error("Please select at least one image");
+      return;
+    }
     const formData = new FormData();
-    formData.append("image", image);
+    images.forEach(img => {
+      formData.append("image", img);
+    });
     formData.append("name", data.name);
     formData.append("description", data.description);
     formData.append("price", Number(data.price));
     formData.append("category", data.category);
-    const response = await axios.post(`${url}/api/food/add`, formData);
-    if (response.data.success) {
-      setData({
-        name: "",
-        description: "",
-        price: "",
-        category: "salad",
-      });
-      setImage(false);
-      toast.success(response.data.message);
-    } else {
-      toast.error(response.data.message);
+
+    try {
+      const response = await axios.post(`${url}/api/food/add`, formData);
+      if (response.data.success) {
+        setData({
+          name: "",
+          description: "",
+          price: "",
+          category: categories.length > 0 ? categories[0].name : "",
+        });
+        setImages([]);
+        toast.success(response.data.message);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error("Error adding food item");
     }
   };
+
   return (
     <div className="add">
       <form className="flex-col" onSubmit={onsubmitHandler}>
         <div className="add-img-upload flex-col">
-          <p>Upload Image</p>
+          <p>Upload Images (Max 5)</p>
           <label htmlFor="image">
-            <img
-              src={image ? URL.createObjectURL(image) : assets.upload_area}
-              alt=""
-            />
+            <div className="multi-image-preview">
+              {images.length > 0 ? (
+                images.map((img, idx) => (
+                  <img key={idx} src={URL.createObjectURL(img)} alt="" />
+                ))
+              ) : (
+                <img src={assets.upload_area} alt="" />
+              )}
+            </div>
           </label>
           <input
-            onChange={(e) => setImage(e.target.files[0])}
+            onChange={handleImageChange}
             type="file"
             id="image"
             hidden
+            multiple
             required
           />
         </div>
@@ -66,6 +109,7 @@ const Add = ({ url }) => {
             type="text"
             name="name"
             placeholder="Type here"
+            required
           />
         </div>
         <div className="add-product-description flex-col">
@@ -76,20 +120,16 @@ const Add = ({ url }) => {
             name="description"
             rows="6"
             placeholder="Write content here"
+            required
           ></textarea>
         </div>
         <div className="add-category-price">
           <div className="add-category flex-col">
             <p>Product category</p>
             <select onChange={onchangeHandler} name="category" value={data.category}>
-              <option value="Salad">Salad</option>
-              <option value="Rolls">Rolls</option>
-              <option value="Deserts">Deserts</option>
-              <option value="Sandwich">Sandwich</option>
-              <option value="Cake">Cake</option>
-              <option value="Pure Veg">Pure Veg</option>
-              <option value="Pasta">Pasta</option>
-              <option value="Noodles">Noodles</option>
+              {categories.map((cat, index) => (
+                <option key={index} value={cat.name}>{cat.name}</option>
+              ))}
             </select>
           </div>
           <div className="add-price flex-col">
@@ -100,6 +140,7 @@ const Add = ({ url }) => {
               type="Number"
               name="price"
               placeholder="$20"
+              required
             />
           </div>
         </div>

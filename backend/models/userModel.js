@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema(
       type: Object,
       default: {},
     },
+    address: {
+      type: Object,
+      default: {},
+    },
   },
   { minimize: false }
 );

@@ -7,6 +7,8 @@ import "dotenv/config";
 import cartRouter from "../Routes/cartRoute.js";
 import orderRouter from "../Routes/orderRoute.js";
 import connectCloudinary from "../config/cloudinary.js";
+import categoryRouter from "../Routes/categoryRoute.js";
+import settingsRouter from "../Routes/settingsRoute.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -43,6 +45,8 @@ app.use("/images", express.static("uploads"));
 app.use("/api/user", userRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
+app.use("/api/category", categoryRouter);
+app.use("/api/settings", settingsRouter);
 app.get("/", (req, res) => {
   res.send("API working");
 });

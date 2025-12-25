@@ -5,8 +5,9 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const placeOrder = async (req, res) => {
-  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-  const userId = req.userId; // Assuming you updated authMiddleware to set req.userId
+  const { origin } = req.body;
+  const frontendUrl = origin || process.env.FRONTEND_URL || "http://localhost:5173";
+  const userId = req.userId;
 
   try {
     const newOrder = new orderModel({
@@ -17,22 +18,25 @@ const placeOrder = async (req, res) => {
     });
     await newOrder.save();
 
-    await userModel.findByIdAndUpdate(userId, { cartData: {} });
+    await userModel.findByIdAndUpdate(userId, { 
+      cartData: {},
+      address: req.body.address 
+    });
 
     const line_items = req.body.items.map((item) => ({
       price_data: {
-        currency: "inr",
+        currency: "usd",
         product_data: {
           name: item.name,
         },
-        unit_amount: item.price * 100,
+        unit_amount: Math.round(item.price * 100),
       },
       quantity: item.quantity,
     }));
 
     line_items.push({
       price_data: {
-        currency: "inr",
+        currency: "usd",
         product_data: {
           name: "Delivery charges",
         },
@@ -51,7 +55,7 @@ const placeOrder = async (req, res) => {
     res.json({ success: true, session_url: session.url });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error placing order" });
+    res.json({ success: false, message: error.message });
   }
 };
 const verifyOrder = async (req, res) => {
@@ -74,7 +78,7 @@ const verifyOrder = async (req, res) => {
 
 const usersOrder = async (req, res) => {
   try {
-    const orders = await orderModel.find({ userId: req.userId });
+    const orders = await orderModel.find({ userId: req.userId }).sort({ _id: -1 });
     res.json({ success: true, data: orders });
   } catch (error) {
     console.log(error);
@@ -86,7 +90,7 @@ const usersOrder = async (req, res) => {
 
 const listOrders = async (req, res) => {
   try {
-    const orders = await orderModel.find({});
+    const orders = await orderModel.find({}).sort({ _id: -1 });
     res.json({ success: true, data: orders });
   } catch (error) {
     console.log(error);

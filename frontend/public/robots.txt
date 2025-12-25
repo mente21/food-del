@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /verify
+
+Sitemap: https://food-del-mentes.vercel.app/sitemap.xml

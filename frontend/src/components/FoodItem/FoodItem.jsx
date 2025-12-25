@@ -4,17 +4,19 @@ import { assets } from "../../assets/assets";
 import { useContext, useState } from "react";
 import { StoreContext } from "../../context/StoreContext";
 
-const FoodItem = ({ id, name, price, description, image }) => {
+const FoodItem = ({ id, name, price, description, image, item, setSelectedProduct }) => {
   const { cartItems, addToCart, removeFromCart, url } =
     useContext(StoreContext);
 
+  const displayImage = Array.isArray(image) ? image[0] : image;
   return (
     <div className="food-item">
       <div className="food-item-img-container">
         <img
           className="food-item-image"
-          src={image.startsWith("http") ? image : url + "/images/" + image}
+          src={displayImage.startsWith("http") ? displayImage : url + "/images/" + displayImage}
           alt=""
+          onClick={() => setSelectedProduct(item)}
         />
 
         {!cartItems[id] ? (
@@ -42,7 +44,7 @@ const FoodItem = ({ id, name, price, description, image }) => {
       </div>
 
       <div className="food-item-info">
-        <div className="food-item-name-rating">
+        <div className="food-item-name-rating" onClick={() => setSelectedProduct(item)}>
           <p>{name}</p>
           <img src={assets.rating_starts} alt="Rating" />
         </div>

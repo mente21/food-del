@@ -1,18 +1,42 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import "./Navbar.css";
 import { assets } from "../../assets/assets";
 import { Link, useNavigate } from "react-router-dom";
 import { StoreContext } from "../../context/StoreContext";
+
 const Navbar = ({ setShowLogin }) => {
   const [menu, setMenu] = useState("menu");
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  
+  const dropdownRef = useRef(null);
 
-  const { getTotalCartAmount, setToken, token } = useContext(StoreContext);
+  const { getTotalCartAmount, getTotalCartItems, setToken, token, settings } = useContext(StoreContext);
   const nav = useNavigate();
+  
   const logout = () => {
     localStorage.removeItem("token");
     setToken("");
+    setShowProfileDropdown(false);
     nav("/");
   };
+
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowProfileDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <div className="navbar">
       <Link to={"/"}>
@@ -47,27 +71,47 @@ const Navbar = ({ setShowLogin }) => {
         >
           contact us
         </a>
+        {token && (
+          <Link
+            to="/myorders"
+            onClick={() => setMenu("orders")}
+            className={menu === "orders" ? "active" : ""}
+          >
+            orders
+          </Link>
+        )}
       </ul>
       <div className="navbar-right">
-        <img src={assets.search_icon} alt="" />
+        <div className={`navbar-search-container ${showSearch ? 'active' : ''}`}>
+          <input 
+            type="text" 
+            placeholder="Search favorites..." 
+            value={searchQuery}
+            onChange={handleSearch}
+            className={showSearch ? 'show' : ''}
+          />
+          <img 
+            src={assets.search_icon} 
+            alt="search" 
+            onClick={() => setShowSearch(!showSearch)} 
+          />
+        </div>
         <div className="navbar-search-icon">
           <Link to={"/cart"}>
-            {" "}
-            <img src={assets.basket_icon} alt="" />{" "}
+            <img src={assets.basket_icon} alt="" />
           </Link>
-          <div className={getTotalCartAmount() === 0 ? "" : "dot"}></div>
+          {getTotalCartItems() > 0 && <span className="cart-badge">{getTotalCartItems()}</span>}
         </div>
         {!token ? (
           <button onClick={() => setShowLogin(true)}>sign in</button>
         ) : (
-          <div className="navbar-profile">
-            <img src={assets.profile_icon} alt="" />
-            <ul className="nav-profile-dropdown">
-              <li onClick={() => nav("/myorders")}>
-                <img src={assets.bag_icon} alt="" />
-                <p>orders</p>
-              </li>
-              <hr />
+          <div className="navbar-profile" ref={dropdownRef}>
+            <img 
+              src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" 
+              alt="profile" 
+              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+            />
+            <ul className={`nav-profile-dropdown ${showProfileDropdown ? 'show' : ''}`}>
               <li onClick={logout}>
                 <img src={assets.logout_icon} alt="" />
                 <p>Logout</p>
@@ -79,4 +123,5 @@ const Navbar = ({ setShowLogin }) => {
     </div>
   );
 };
+
 export default Navbar;

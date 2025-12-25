@@ -1,28 +1,93 @@
+.list {
+    width: 100%;
+    padding: 3rem 5%;
+    animation: fadeIn 0.6s ease-out;
+}
+
+.list p.list-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+}
+
 .list-table-format {
     display: grid;
-    grid-template-columns: 0.5fr 2fr 1fr 1fr 0.5fr;
+    grid-template-columns: 0.8fr 2fr 1.2fr 1fr 1fr 1fr;
     align-items: center;
-    gap: 10px;
-    padding: 12px 15px;
-    border: 1px solid #cacaca;
-    font-size: 13px;
+    gap: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background-color: var(--bg-white);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9375rem;
+    transition: var(--transition);
 }
+
+.edit-btn {
+    color: #4CAF50 !important;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.delete-btn {
+    color: #f44336 !important;
+    font-weight: 600;
+}
+
+.list-table-format:not(.title):hover {
+    background-color: var(--bg-primary);
+}
+
 .list-table-format.title {
-    background-color: #f7f7f7;
+    background-color: var(--bg-primary);
+    font-weight: 700;
+    color: var(--text-secondary);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    border: 1px solid var(--border-color);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
 }
 
 .list-table-format img {
-    width: 50px;
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
 }
+
 .cursor {
     cursor: pointer;
+    color: var(--text-muted);
+    transition: var(--transition);
 }
+
+.cursor:hover {
+    color: var(--primary-color);
+    transform: scale(1.2);
+}
+
+@media (max-width: 900px) {
+    .list-table-format {
+        grid-template-columns: 1fr 2fr 1fr 1fr 0.5fr;
+        gap: 1rem;
+        padding: 1rem;
+    }
+}
+
 @media (max-width: 600px) {
     .list-table-format {
-        grid-template-columns: 1fr 3fr 1fr;
-        gap: 15px;
+        grid-template-columns: 0.5fr 2fr 0.5fr;
+        gap: 1rem;
     }
+
     .list-table-format.title {
         display: none;
     }
-} 
+
+    .list-table-format *:nth-child(3),
+    .list-table-format *:nth-child(4) {
+        display: none;
+    }
+}

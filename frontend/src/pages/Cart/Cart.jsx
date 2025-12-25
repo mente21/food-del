@@ -3,10 +3,19 @@ import "./Cart.css";
 import { StoreContext } from "../../context/StoreContext";
 import { Navigate, useNavigate } from "react-router-dom";
 
-const Cart = () => {
-  const { cartItems, food_list, removeFromCart, getTotalCartAmount, url } =
+const Cart = ({ setShowLogin }) => {
+  const { cartItems, food_list, removeFromCart, getTotalCartAmount, url, token } =
     useContext(StoreContext);
   const nav = useNavigate();
+
+  const handleProceedToCheckout = () => {
+    if (!token) {
+      setShowLogin(true);
+    } else {
+      nav("/order");
+    }
+  };
+
   return (
     <div className="cart">
       <div className="cart-items">
@@ -23,9 +32,9 @@ const Cart = () => {
         {food_list.map((item, index) => {
           if (cartItems[item._id] > 0) {
             return (
-              <div>
+              <div key={item._id}>
                 <div className="cart-items-title cart-items-item">
-                  <img src={url + "/images/" + item.image} alt="" />
+                  <img src={(Array.isArray(item.image) ? item.image[0] : item.image).startsWith("http") ? (Array.isArray(item.image) ? item.image[0] : item.image) : url + "/images/" + (Array.isArray(item.image) ? item.image[0] : item.image)} alt="" />
                   <p>{item.name}</p>
                   <p>${item.price}</p>
                   <p>{cartItems[item._id]}</p>
@@ -62,7 +71,7 @@ const Cart = () => {
               </b>
             </div>
           </div>
-          <button onClick={() => nav("/order")}>PROCEED TO CHECKOUT</button>
+          <button onClick={handleProceedToCheckout}>PROCEED TO CHECKOUT</button>
         </div>
         <div className="cart-promocode">
           <div>

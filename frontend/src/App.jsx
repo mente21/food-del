@@ -7,7 +7,7 @@ import PlaceOrder from "./pages/PlaceOrder/PlaceOrder";
 import Footer from "./components/Footer/Footer";
 import Loginpopup from "./components/Loginpopup/Loginpopup"; // Ensure correct import path
 import Verify from "./pages/verify/verify";
-import Myorders from "./pages/myOrders/myOrders";
+import MyOrders from "./pages/myOrders/myOrders";
 const App = () => {
   // State to manage the visibility of the Login Popup
   const [showLogin, setShowLogin] = useState(false);
@@ -25,10 +25,10 @@ const App = () => {
 
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/cart" element={<Cart />} />
+          <Route path="/cart" element={<Cart setShowLogin={setShowLogin} />} />
           <Route path="/order" element={<PlaceOrder />} />
           <Route path="/verify" element={<Verify />} />
-          <Route path="/myorders" element={<Myorders />} />
+          <Route path="/myorders" element={<MyOrders />} />
         </Routes>
       </div>
       <Footer />

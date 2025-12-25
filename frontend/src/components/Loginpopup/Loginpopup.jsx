@@ -6,8 +6,9 @@ import { StoreContext } from "../../context/StoreContext";
 import axios from "axios";
 
 const LoginPopup = ({ setShowLogin }) => {
+  const { url, setToken } = useContext(StoreContext);
   const [currState, setCurrState] = useState("Login");
-  const { url, token, setToken } = useContext(StoreContext);
+  const [loading, setLoading] = useState(false);
   const [data, setData] = useState({
     name: "",
     email: "",
@@ -22,29 +23,37 @@ const LoginPopup = ({ setShowLogin }) => {
 
   const onloginHandler = async (event) => {
     event.preventDefault();
+    setLoading(true);
     let newUrl = url;
 
-    // Check if required fields are present before building the URL and sending
     if (currState === "Sign Up") {
       if (!data.name || !data.email || !data.password) {
-        alert(
-          "Please fill in all fields (Name, Email, and Password) to register."
-        );
-        return; // Stop the function if validation fails
+        alert("Please fill in all fields (Name, Email, and Password) to register.");
+        setLoading(false);
+        return;
       }
       newUrl += "/api/user/register";
     } else {
       newUrl += "/api/user/login";
     }
 
-    const response = await axios.post(newUrl, data);
+    try {
+      console.log("Attempting request to:", newUrl);
+      
+      const response = await axios.post(newUrl, data);
 
-    if (response.data.success) {
-      setToken(response.data.token);
-      localStorage.setItem("token", response.data.token);
-      setShowLogin(false);
-    } else {
-      alert(response.data.message);
+      if (response.data.success) {
+        setToken(response.data.token);
+        localStorage.setItem("token", response.data.token);
+        setShowLogin(false);
+      } else {
+        alert(response.data.message);
+      }
+    } catch (error) {
+      console.error("Login/Registration Error:", error);
+      alert(error.response?.data?.message || "Something went wrong. Please check your connection or try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,8 +98,8 @@ const LoginPopup = ({ setShowLogin }) => {
             required
           />
         </div>
-        <button type="submit">
-          {currState === "Sign Up" ? "Create account" : "Login"}
+        <button type="submit" disabled={loading}>
+          {loading ? "Processing..." : (currState === "Sign Up" ? "Create account" : "Login")}
         </button>
         <div className="login-popup-condition">
           <input type="checkbox" required />

@@ -8,6 +8,14 @@ import { assets } from "../../assets/assets";
 
 const Orders = ({ url }) => {
   const [orders, setOrders] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(orders.length / itemsPerPage);
+
   const fetchOrders = async () => {
     const response = await axios.get(url + "/api/order/list");
     if (response.data.success) {
@@ -38,7 +46,7 @@ const Orders = ({ url }) => {
     <div className="order add">
       <h3>Order Page</h3>
       <div className="order-list">
-        {orders.map((order, index) => (
+        {currentOrders.map((order, index) => (
           <div key={index} className="order-item">
             <img src={assets.parcel_icon} alt="" />
 
@@ -85,6 +93,15 @@ const Orders = ({ url }) => {
           </div>
         ))}
       </div>
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>&lt;</button>
+          {[...Array(totalPages)].map((_, i) => (
+            <button key={i} className={currentPage === i + 1 ? "active" : ""} onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
+          ))}
+          <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>&gt;</button>
+        </div>
+      )}
     </div>
   );
 };

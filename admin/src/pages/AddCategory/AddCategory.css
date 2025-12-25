@@ -1,0 +1,39 @@
+.add-category-page {
+    width: 70%;
+    padding: 50px;
+    animation: fadeIn 1s;
+}
+
+.add-category-page form {
+    gap: 20px;
+}
+
+.add-category-page .add-img-upload img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 2px dashed var(--border-color);
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-category-page .add-img-upload img:hover {
+    border-color: var(--primary-color);
+    background: rgba(255, 107, 53, 0.05);
+}
+
+.add-category-page input {
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    outline-color: var(--primary-color);
+}
+
+@media (max-width: 600px) {
+    .add-category-page {
+        width: 100%;
+        padding: 20px;
+    }
+}

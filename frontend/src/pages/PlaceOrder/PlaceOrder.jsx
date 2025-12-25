@@ -5,7 +5,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const PlaceOrder = () => {
-  const { getTotalCartAmount, token, food_list, cartItems, url } =
+  const { getTotalCartAmount, token, food_list, cartItems, url, userData } =
     useContext(StoreContext);
   const nav = useNavigate();
 
@@ -20,6 +20,18 @@ const PlaceOrder = () => {
     country: "",
     phone: "",
   });
+
+  // Pre-fill form if userData has an address
+  useEffect(() => {
+    if (userData) {
+      if (userData.address && Object.keys(userData.address).length > 0) {
+        setData(userData.address);
+      } else {
+        // Fallback: fill email from account
+        setData((prev) => ({ ...prev, email: userData.email || "" }));
+      }
+    }
+  }, [userData]);
   const onChangeHandler = (event) => {
     const name = event.target.name;
     const value = event.target.value;
@@ -30,7 +42,7 @@ const PlaceOrder = () => {
     let orderItems = [];
     food_list.map((item) => {
       if (cartItems[item._id] > 0) {
-        let itemInfo = item;
+        let itemInfo = { ...item };
         itemInfo["quantity"] = cartItems[item._id];
         orderItems.push(itemInfo);
       }
@@ -39,6 +51,7 @@ const PlaceOrder = () => {
       address: data,
       items: orderItems,
       amount: getTotalCartAmount() + 2,
+      origin: window.location.origin,
     };
     let response = await axios.post(url + "/api/order/place", orderData, {
       headers: { token },
@@ -47,7 +60,7 @@ const PlaceOrder = () => {
       const { session_url } = response.data;
       window.location.replace(session_url);
     } else {
-      alert("Error");
+      alert(response.data.message || "Error placing order");
     }
   };
   useEffect(() => {
@@ -147,7 +160,7 @@ const PlaceOrder = () => {
           <div>
             <div className="cart-total-details">
               <p>Subtotal</p>
-              <p>${getTotalCartAmount() === 0 ? 0 : 2}</p>
+              <p>${getTotalCartAmount()}</p>
             </div>
             <hr />
             <div className="cart-total-details">
